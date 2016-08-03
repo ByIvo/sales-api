@@ -35,7 +35,7 @@ Usado para confirmar a digitação da senha do usuário durante seu primeiro cad
 ###cart###
 Carrinho de compras que armazena os produtos desejados e a quantidade individual da futura compra
 
-> Escopo: _**/user**_
+> Escopo: _**/users**_
 
 Caminho | Método | Parametros | Retorno
 ------- | ------ | ---------- | ------
