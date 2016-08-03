@@ -9,11 +9,11 @@
 Campo | Tipo | Not Null | Tamanho | Formato
 ----- | ---- | -------- | ------- | -------
 [**id**](#id) | Integer | [x] | |
-[**name**](#id)  | STRING | [x] | 80 |
-[**email**](#id)  | STRING | [x] | 100 | Formato padrão de e-mail
-[**password**](#id)  | STRING | [x] | 512 |
-[**confirmPassword**](#id)  | STRING | [ ] | |
-[**cart**](#id)  | LIST | [ ] |  |
+[**name**](#name)  | STRING | [x] | 80 |
+[**email**](#email)  | STRING | [x] | 100 | Formato padrão de e-mail
+[**password**](#password)  | STRING | [x] | 512 |
+[**confirmPassword**](#confirmPassword)  | STRING | [ ] | |
+[**cart**](#cart)  | LIST | [ ] |  |
 
 ###id###
 Identificador numérico sequencial do usuário
