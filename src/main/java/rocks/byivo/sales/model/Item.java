@@ -21,6 +21,11 @@ public class Item extends Entity {
     public Item() {
         price = 0d;
     }
+    
+     public Item(Integer id) {
+        this.id = id;
+        price = 0d;
+    }
 
     @Override
     public Integer getId() {
@@ -51,6 +56,7 @@ public class Item extends Entity {
     public Double getPrice() {
         return price;
     }
+
 
     public void setPrice(Double price) {
         this.price = price;

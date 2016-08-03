@@ -5,6 +5,7 @@
  */
 package rocks.byivo.sales.model;
 
+import com.sun.org.apache.bcel.internal.generic.AALOAD;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +24,7 @@ public abstract class Entity implements Serializable {
     }
 
     public boolean validContent() {
+        
         return true;
     }
     
@@ -30,10 +32,14 @@ public abstract class Entity implements Serializable {
         invalidMessages.put(field, message);
     }
     
+    public void clearInvalidMessages() {
+        this.invalidMessages.clear();
+    }
+    
     public Map<String, String> getInvalidMessages(boolean clear) {
         Map<String, String> invalidMessagestoReturn = new HashMap<>(invalidMessages);
         
-        if(clear) invalidMessages.clear();
+        if(clear) this.clearInvalidMessages();
         
         return invalidMessagestoReturn;
     }

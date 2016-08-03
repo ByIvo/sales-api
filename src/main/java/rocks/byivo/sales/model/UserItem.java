@@ -26,8 +26,11 @@ public class UserItem {
     }
 
     public void sumQuantity(int quantity) {
-        quantity = quantity < 1 ? 1 : quantity;
         this.quantity += quantity;
+        
+        if(this.quantity < 1) {
+            this.quantity = 1;
+        }
     }
 
     public void sumOne() {

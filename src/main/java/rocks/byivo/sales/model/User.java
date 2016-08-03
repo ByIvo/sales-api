@@ -5,9 +5,11 @@
  */
 package rocks.byivo.sales.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,10 +28,10 @@ public class User extends Entity {
     private String name;
     private String email;
 
-    @JsonIgnore
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private String password;
 
-    @JsonIgnore
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private String confirmPassword;
 
     private List<UserItem> cart;
@@ -38,8 +40,39 @@ public class User extends Entity {
         cart = new ArrayList<>();
     }
 
+    public User(Integer id) {
+        this.id = id;
+    }
+
+    private User createMock(User newValues) {
+        User mockValues = new User();
+        mockValues.setPassword(this.password);
+        mockValues.setConfirmPassword(this.confirmPassword);
+        mockValues.setId(this.id);
+
+        mockValues.setName(newValues.getName());
+        mockValues.setEmail(newValues.getEmail());
+
+        return mockValues;
+    }
+
+    public Map<String,String> update(User newValues) {
+        User mockValues = createMock(newValues);
+
+        boolean valid = mockValues.validContent();
+
+        if (valid) {
+            this.setName(newValues.name);
+            this.setEmail(newValues.email);
+            return new HashMap<>();
+        }
+
+        return mockValues.getInvalidMessages(true);
+    }
+
     @Override
     public boolean validContent() {
+        this.clearInvalidMessages();
         boolean invalidName = false;
         boolean invalidPassword = false;
         boolean invalidEmail = false;
@@ -132,7 +165,7 @@ public class User extends Entity {
     }
 
     public String getPassword() {
-        return password;
+        return null;
     }
 
     public void setPassword(String password) {
@@ -140,11 +173,15 @@ public class User extends Entity {
     }
 
     public String getConfirmPassword() {
-        return confirmPassword;
+        return null;
     }
 
     public void setConfirmPassword(String confirmPassword) {
         this.confirmPassword = confirmPassword;
+    }
+    
+    public String getSecuredPassword() {
+        return this.password;
     }
 
     public List<UserItem> getCart() {
