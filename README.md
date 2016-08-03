@@ -45,6 +45,6 @@ Caminho | Método | Parametros | Retorno
 **/{USER_ID}** | _PUT_ | [usuário](#campos-do-usuário) | Informações atualizadas do [usuário](#usuário).
 **/{USER_ID}** | _DELETE_ | Identificador do [usuário](#usuário) a ser excluído | Informação do [usuário](#usuário) removido.
 **/{USER_ID}/cart** | _GET_ | *USER_ID* - Identificador do [usuário](#usuário)| Informações do [carrinho](#campos-do-usuário) do cliente
-**/{USER_ID}/cart/{ITEM_ID}/** | _POST_ | *USER_ID* - Identificador do [usuário](#usuário) <BR> [*ITEM_ID*](#item) à ser adicionado no [carrinho](#campos-do-usuário) | Informações do [carrinho](#campos-do-usuário) do [usuário](#usuário)
+**/{USER_ID}/cart/{ITEM_ID}/{QUANTITY}** | _POST_ | *USER_ID* - Identificador do [usuário](#usuário) <BR> [*ITEM_ID*](#item) à ser alteado no [carrinho](#campos-do-usuário) <BR> *QUANTITY* - Quantidade a ser acrescida/decrescida | Informações do [carrinho](#campos-do-usuário) do [usuário](#usuário)
 **/{USER_ID}/cart/{ITEM_ID}/** | _DELETE_ |  *USER_ID* - Identificador do [usuário](#usuário) <BR> [*ITEM_ID*](#item) à ser removido no [carrinho](#campos-do-usuário) | Informações do [carrinho](#campos-do-usuário) do [usuário](#usuário)
 **/{USER_ID}/cart/{ITEM_ID}/{QUANTITY}** | _PUT_ |  *USER_ID* - Identificador do [usuário](#usuário) <BR> [*ITEM_ID*](#item) à ser alteado no [carrinho](#campos-do-usuário) <BR> *QUANTITY* - Quantidade a ser acrescida/decrescida | Informações do [carrinho](#campos-do-usuário) do [usuário](#usuário)
