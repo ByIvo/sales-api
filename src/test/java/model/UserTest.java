@@ -257,7 +257,88 @@ public class UserTest {
 
         assertTrue(user.validContent());
     }
+    
+    @Test
+    public void updateUserSuccessfull() {
+        
+        String name = "Ivo";
+        String email= "irb@asdasd.com";
+        String password = "asd";
+        
+        User user = new User();
+        user.setName("nome");
+        user.setEmail("mail@mail.com");
+        user.setPassword(password);
+        user.setConfirmPassword(password);
+        
+        User changes = new User();
+        changes.setName(name);
+        changes.setEmail(email);
+        changes.setPassword("another");
+        changes.setConfirmPassword("another");
 
+        assertTrue(user.validContent());
+        assertTrue(changes.validContent());
+        assertTrue(user.update(changes).isEmpty());
+        
+        assertEquals(name, user.getName());
+        assertEquals(email, user.getEmail());
+        assertEquals(password, user.getSecuredPassword());
+    }
+    
+     @Test
+    public void updateUserUnsuccessfull() {
+        
+        String name = "Ivo";
+        String email= "irbsdasd.com";
+        String password = "asd";
+        
+        User user = new User();
+        user.setName("nome");
+        user.setEmail("mail@mail.com");
+        user.setPassword(password);
+        user.setConfirmPassword(password);
+        
+        User changes = new User();
+        changes.setName(name);
+        changes.setEmail(email);
+        changes.setPassword("another");
+        changes.setConfirmPassword("another");
+
+        assertTrue(user.validContent());
+        assertFalse(changes.validContent());
+        assertFalse(user.update(changes).isEmpty());
+        
+        assertEquals("nome", user.getName());
+        assertEquals("mail@mail.com", user.getEmail());
+        assertEquals(password, user.getSecuredPassword());
+    }
+
+        @Test
+    public void updateUserSuccessfullTest() {
+        
+        String name = "Ivo";
+        String email= "irb@asdasd.com";
+        String password = "asd";
+        
+        User user = new User();
+        user.setName("nome");
+        user.setEmail("mail@mail.com");
+        user.setPassword(password);
+        user.setConfirmPassword(password);
+        
+        User changes = new User();
+        changes.setName(name);
+        changes.setEmail(email);
+
+        assertTrue(user.validContent());
+        assertTrue(user.update(changes).isEmpty());
+        
+        assertEquals(name, user.getName());
+        assertEquals(email, user.getEmail());
+        assertEquals(password, user.getSecuredPassword());
+    }
+    
     @Test
     public void emptyCar() {
         User user = new User();
