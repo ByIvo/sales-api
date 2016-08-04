@@ -15,14 +15,16 @@
           http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">    
     
-   <context:component-scan base-package="rocks.byivo.sales"/>
+    <context:component-scan base-package="rocks.byivo.sales"/>
     <context:annotation-config />
-
-<!--    <bean id="viewResolver"
-          class="org.springframework.web.servlet.view.InternalResourceViewResolver"
-          p:suffix=".jsp" />-->
     
-     <!-- JACKSON CONFIGURATIONS-->
+    <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor" />
+
+    <!--    <bean id="viewResolver"
+    class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+    p:suffix=".jsp" />-->
+    
+    <!-- JACKSON CONFIGURATIONS-->
     <!-- ALLOWS CUSTOM CREATION IN JAVA OBJECT PARSE TO JSON OBJECT -->
     <bean id="jacksonCustomMapper" class="rocks.byivo.sales.util.CustomJSONMapper"/>
     
@@ -35,12 +37,12 @@
         </mvc:message-converters>
     </mvc:annotation-driven>
     
-     <!-- Converters to select-->
+    <!-- Converters to select-->
     <bean id="entityConverter"
           class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
         <property name="converters">
             <set>
-<!--                <bean class="rocks.byivo.todolist.converters.TBoardConverter" />-->
+                <!--                <bean class="rocks.byivo.todolist.converters.TBoardConverter" />-->
             </set>
         </property>
     </bean>
