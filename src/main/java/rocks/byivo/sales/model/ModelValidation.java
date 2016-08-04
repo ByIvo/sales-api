@@ -30,7 +30,7 @@ public class ModelValidation {
         
         public static final String LONGEST_IMAGE = "O link informado é muito grande!";
         
-        public static final String WRONG_PRICE = "O preço não pode ser R$ 0,00!";
+        public static final String WRONG_PRICE = "O preço deve ser maior que R$ 0,00!";
     }
     
     public static class Sell {
