@@ -5,6 +5,7 @@
  */
 package rocks.byivo.sales.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -119,25 +120,6 @@ public class User extends Entity {
         return matcher.matches();
     }
 
-    public UserItem addToCart(Item item, int quantity) {
-        quantity = quantity < 1 ? 1 : quantity;
-
-        UserItem userItem = new UserItem();
-        userItem.setItem(item);
-        userItem.setUser(this);
-
-        if (this.cart.contains(userItem)) {
-            int i = this.cart.indexOf(userItem);
-            userItem = this.cart.get(i);
-        } else {
-            this.cart.add(userItem);
-        }
-
-        userItem.sumQuantity(quantity);
-
-        return userItem;
-    }
-
     @Override
     public Integer getId() {
         return id;
@@ -180,6 +162,7 @@ public class User extends Entity {
         this.confirmPassword = confirmPassword;
     }
     
+    @JsonIgnore
     public String getSecuredPassword() {
         return this.password;
     }
