@@ -5,6 +5,7 @@
  */
 package rocks.byivo.sales.dao;
 
+import rocks.byivo.sales.util.ConnectionManager;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,8 +36,9 @@ public class UserItemDAO extends GenericDAO<UserItem> {
     private static final String LIST_CART_STATEMENT = "SELECT * FROM %1$s %1$s INNER JOIN users users ON %1$s.user_id = users.id INNER JOIN items items ON %1$s.item_id = items.id WHERE %1$s.user_id = ?";
     private static final String FIND_USER_ITEM_STATEMENT = "SELECT * FROM %1$s %1$s INNER JOIN users users ON %1$s.user_id = users.id INNER JOIN items items ON %1$s.item_id = items.id WHERE %1$s.user_id = ? AND %1$s.item_id = ?";
     private static final String UPDATE_ITEM_CART_STATEMENT = "UPDATE %1$s %1$s SET %2$s WHERE %1$s.user_id = ? AND %1$s.item_id = ?";
-    
+
     private static final String DELETE_ITEM_CART_STATEMENT = "DELETE FROM %1$s WHERE user_id = ? AND item_id = ?";
+    private static final String CLEAR_USER_CART = "DELETE FROM %1$s WHERE user_id = ?";
 
     @Autowired
     private ItemDAO itemDao;
@@ -49,6 +51,47 @@ public class UserItemDAO extends GenericDAO<UserItem> {
 
     public UserItemDAO() {
         super("user_items");
+    }
+
+    public User clearCart(User user) {
+        try {
+            return clearCartUnsafe(user);
+        } catch (SQLException ex) {
+            Logger.getLogger(GenericDAO.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(GenericDAO.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        }
+        return user;
+    }
+
+    public User clearCartUnsafe(final User user) throws SQLException, Exception {
+        final UserItem adapter = new UserItem();
+        adapter.setUser(user);
+        adapter.setItem(new Item());
+
+        this.executeUpdateUnsafe(adapter, new UpdateAdapter<UserItem>() {
+
+            @Override
+            public PreparedStatement prepareStatement(UserItem value, Connection connection, Map<String, Object> columns) throws SQLException {
+                String deleteStatement = String.format(CLEAR_USER_CART, UserItemDAO.this.getTableName());
+
+                return UserItemDAO.this.prepareStatement(deleteStatement, connection);
+            }
+
+            @Override
+            public void setupStatement(PreparedStatement statement) throws SQLException {
+                statement.setInt(1, adapter.getUser().getId());
+            }
+
+            @Override
+            public void handleGeneratedKey(UserItem insertedValue, int key) throws SQLException {
+
+            }
+        });
+
+        return user;
     }
 
     @Override
@@ -123,9 +166,9 @@ public class UserItemDAO extends GenericDAO<UserItem> {
 
             @Override
             public PreparedStatement prepareStatement(UserItem value, Connection connection, Map<String, Object> columns) throws SQLException, Exception {
-               return UserItemDAO.this.prepareUpdateStatement(value, UPDATE_ITEM_CART_STATEMENT, connection, columns);
+                return UserItemDAO.this.prepareUpdateStatement(value, UPDATE_ITEM_CART_STATEMENT, connection, columns);
             }
-            
+
             @Override
             public void setupStatement(PreparedStatement statement) throws SQLException {
                 statement.setInt(4, value.getUser().getId());
@@ -141,9 +184,9 @@ public class UserItemDAO extends GenericDAO<UserItem> {
 
     @Override
     public UserItem deleteUnsafe(final UserItem value) throws SQLException, Exception {
-       return this.executeUpdateUnsafe(value, new UpdateAdapter<UserItem>() {
+        return this.executeUpdateUnsafe(value, new UpdateAdapter<UserItem>() {
 
-             @Override
+            @Override
             public PreparedStatement prepareStatement(UserItem value, Connection connection, Map<String, Object> columns) throws SQLException {
                 String deleteStatement = String.format(DELETE_ITEM_CART_STATEMENT, UserItemDAO.this.getTableName());
 
@@ -158,12 +201,10 @@ public class UserItemDAO extends GenericDAO<UserItem> {
 
             @Override
             public void handleGeneratedKey(UserItem insertedValue, int key) throws SQLException {
-                
+
             }
         });
     }
-    
-    
 
     @Override
     public void getColumnValues(UserItem values, Map<String, Object> map) {

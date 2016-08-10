@@ -27,6 +27,6 @@ public class LoggedUserService {
     private UserDAO userDao;
     
     public User getLoggedUser() {
-        return userDao.findById(1);
+        return userDao.findById(2);
     }   
 }

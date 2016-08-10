@@ -40,6 +40,12 @@ public class UserService {
         boolean valid = user.validContent();
 
         if (valid) {
+            boolean isPasswordEncrypted = user.encryptPassword();
+
+            if (!isPasswordEncrypted) {
+                return new ResponseEntity<>(user.getInvalidMessages(true), HttpStatus.UNPROCESSABLE_ENTITY);
+            }
+
             try {
                 User created = userDao.insert(user);
                 return new ResponseEntity<>(created, HttpStatus.CREATED);
@@ -66,8 +72,7 @@ public class UserService {
 
     public ResponseEntity<?> addToCart(User user, Item item, Integer quantity) {
         UserItem userItem = new UserItem(user, item, quantity);
-        
-        
+
         Map<String, String> errors = new HashMap<>();
         try {
             this.userItemDao.insert(userItem);
@@ -112,6 +117,19 @@ public class UserService {
             this.userItemDao.delete(userItem);
 
             return new ResponseEntity(userItem, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> clearCart(User user) {
+        if (user == null) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+
+        try {
+            user = userItemDao.clearCartUnsafe(user);
+            return new ResponseEntity(user, HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }

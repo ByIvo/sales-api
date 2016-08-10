@@ -17,6 +17,7 @@ import rocks.byivo.sales.model.Item;
 import rocks.byivo.sales.model.User;
 import rocks.byivo.sales.model.UserItem;
 import rocks.byivo.sales.services.LoggedUserService;
+import rocks.byivo.sales.services.SellService;
 import rocks.byivo.sales.services.UserService;
 
 /**
@@ -32,7 +33,10 @@ public class LoggedUserController {
 
     @Autowired
     private UserService userService;
-
+    
+    @Autowired
+    private SellService sellService;
+    
     @RequestMapping(value = {"", "/"}, method = RequestMethod.GET)
     public ResponseEntity<?> getLoggedUser() {
         User loggedUser = loggedUserService.getLoggedUser();
@@ -67,6 +71,28 @@ public class LoggedUserController {
         Item item = new Item(itemId);
 
         return userService.removeFromCart(loggedUser, item);
+    }
+    
+    @RequestMapping(value = {"/cart/clear"}, method = RequestMethod.DELETE)
+    public ResponseEntity<?> clearCart() {
+        User loggedUser = this.loggedUserService.getLoggedUser();
+        
+        return userService.clearCart(loggedUser);
+    }
+    
+    
+    @RequestMapping(value = {"/sells"}, method = RequestMethod.GET)
+    public ResponseEntity<?> listSells() {
+        User loggedUser = this.loggedUserService.getLoggedUser();
+        
+        return sellService.listSells(loggedUser);
+    }
+    
+    @RequestMapping(value = {"/finish"}, method = RequestMethod.POST)
+    public ResponseEntity<?> finishSell() {
+        User loggedUser = this.loggedUserService.getLoggedUser();
+        
+        return sellService.finishSell(loggedUser);
     }
 
 }
