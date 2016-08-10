@@ -12,7 +12,7 @@ import java.util.Objects;
  *
  * @author byivo
  */
-public class UserItem {
+public class UserItem extends Entity {
 
     @JsonIgnore
     private User user;
@@ -23,6 +23,13 @@ public class UserItem {
 
     public UserItem() {
         quantity = 0;
+    }
+
+    public UserItem(User user, Item item, int quantity) {
+        this.user = user;
+        this.item = item;
+        this.quantity = 0;
+        this.sumQuantity(quantity);
     }
 
     public void sumQuantity(int quantity) {
@@ -51,6 +58,7 @@ public class UserItem {
         this.user = user;
     }
 
+    
     public Item getItem() {
         return item;
     }
@@ -62,6 +70,7 @@ public class UserItem {
     public Integer getQuantity() {
         return quantity;
     }
+
 
     @Override
     public int hashCode() {
@@ -85,6 +94,17 @@ public class UserItem {
         }
 
         return Objects.equals(this.item, other.item);
+    }
+
+    @JsonIgnore
+    @Override
+    public Integer getId() {
+       return -1;
+    }
+
+    @Override
+    public void setId(Integer id) {
+        
     }
 
 }
