@@ -5,6 +5,7 @@
  */
 package rocks.byivo.sales.dao;
 
+import rocks.byivo.sales.util.ConnectionManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,19 +25,40 @@ import rocks.byivo.sales.model.SellItem;
 @Repository
 public class SellItemDAO extends GenericDAO<SellItem> {
 
-    private static final String LIST_ALL_STATEMENT = "SELECT * FROM %1$s %1$s INNER JOIN items items ON items.id = %1$s.item_id INNER JOIN sells sells ON sells.id = %1$s.sell_id";
+    private static final String LIST_ALL_STATEMENT = "SELECT * FROM %1$s %1$s INNER JOIN items items ON items.id = %1$s.item_id";
+    private static final String LIST_SELL_ITEMS = "SELECT * FROM %1$s %1$s INNER JOIN items items ON items.id = %1$s.item_id WHERE %1$s.sell_id = ?";
 
     @Autowired
     private ConnectionManager connectionManager;
-
-    @Autowired
-    private SellDAO sellDao;
 
     @Autowired
     private ItemDAO itemDao;
 
     public SellItemDAO() {
         super("sell_items");
+    }
+
+    public List<SellItem> listSellItems(final Sell sell) throws SQLException {
+        final List<SellItem> results = new ArrayList<>();
+
+        String queryStatemente = String.format(LIST_SELL_ITEMS, this.getTableName());
+        this.executeQueryUnsafe(queryStatemente, new QueryAdapter() {
+
+            @Override
+            public void setupStatement(PreparedStatement statement) throws SQLException {
+                statement.setInt(1, sell.getId());
+            }
+
+            @Override
+            public void retrieveResults(ResultSet resultSet) throws SQLException {
+                while (resultSet.next()) {
+                    SellItem newObject = SellItemDAO.this.getEntityFromResultSet(resultSet);
+                    results.add(newObject);
+                }
+            }
+        });
+
+        return results;
     }
 
     @Override
@@ -76,14 +98,12 @@ public class SellItemDAO extends GenericDAO<SellItem> {
     public SellItem getEntityFromResultSet(ResultSet resultSet) throws SQLException {
         SellItem sellItem = new SellItem();
 
-        Sell sell = sellDao.getEntityFromResultSet(resultSet);
         Item item = itemDao.getEntityFromResultSet(resultSet);
 
         sellItem.setId(resultSet.getInt("sell_items.id"));
         sellItem.setQuantity(resultSet.getInt("sell_items.quantity"));
         sellItem.setPrice(resultSet.getDouble("sell_items.price"));
         sellItem.setItem(item);
-        sellItem.setSell(sell);
 
         return sellItem;
     }
