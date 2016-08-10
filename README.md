@@ -1,4 +1,4 @@
-# Configurando JNDI
+# Configurando JNDI para acesso ao Banco de dados MySQL
 
 > No seu arquivo context.xml (do servidor utilizado), adicione as seguintes linhas:
 ```xml
@@ -15,6 +15,28 @@
 ```
 
 > Substitua os parâmetros iniciados por **'DB_'** de acordo com o sugerido.
+
+# Configurando JNDI para autenticação do Java Mail junto ao GMAIL
+
+> No seu arquivo context.xml (do servidor utilizado), adicione as seguintes linhas:
+```xml
+<Resource name="mail/Session" auth="Container"
+        type="javax.mail.Session"
+        mail.smtp.user="GMAIL_USERNAME"
+        password="GMAIL_PASSWORD"
+        mail.debug="false"
+        mail.transport.protocol="smtp"
+        mail.smtp.host= "smtp.gmail.com"
+        mail.smtp.socketFactory.port="465"
+        mail.smtp.socketFactory.class="javax.net.ssl.SSLSocketFactory"
+        mail.smtp.socketFactory.fallback="false"
+        mail.smtp.auth= "true"
+        mail.smtp.port= "465"
+        mail.smtp.starttls.enable="true"
+        description="Global E-Mail Resource"/>
+```
+
+> Substitua os parâmetros **GMAIL_USERNAME** e **GMAIL_PASSWORD** por uma conta de Gmail válida, que será remetente dos e-mails enviados; Você pode configurar os parâmetros para funcionar em outros servidores.
 
 # Criando a base de dados
 
@@ -68,19 +90,40 @@ Usado para confirmar a digitação da senha do usuário durante seu primeiro cad
 ###cart###
 Carrinho de compras que armazena os produtos desejados e a quantidade individual da futura compra
 
+## Gerenciamento via serviços ##
+
 > Escopo: _**/users**_
 
 Caminho | Método | Parametros | Retorno
 ------- | ------ | ---------- | ------
-**/** | _GET_ | ----- | Lista todos os [usuários](#Usuário) existentes na base de dados
-**/{USER_ID}** | _GET_ | Identificador do [usuário](#Usuário) desejado | Informações básicas do [usuário](#usuário) em questão.
-**/** | _POST_ | Informações do novo [usuário](#campos-do-usuário) | Informações do novo [usuário](#usuário)criado.
-**/{USER_ID}** | _PUT_ | [usuário](#campos-do-usuário) | Informações atualizadas do [usuário](#usuário).
-**/{USER_ID}** | _DELETE_ | Identificador do [usuário](#usuário) a ser excluído | Informação do [usuário](#usuário) removido.
-**/{USER_ID}/cart** | _GET_ | *USER_ID* - Identificador do [usuário](#usuário)| Informações do [carrinho](#campos-do-usuário) do cliente
-**/{USER_ID}/cart/{ITEM_ID}/{QUANTITY}** | _POST_ | *USER_ID* - Identificador do [usuário](#usuário) <BR> [*ITEM_ID*](#item) à ser alteado no [carrinho](#campos-do-usuário) <BR> *QUANTITY* - Quantidade a ser acrescida/decrescida | Informações do [carrinho](#campos-do-usuário) do [usuário](#usuário)
-**/{USER_ID}/cart/{ITEM_ID}/** | _DELETE_ |  *USER_ID* - Identificador do [usuário](#usuário) <BR> [*ITEM_ID*](#item) à ser removido no [carrinho](#campos-do-usuário) | Informações do [carrinho](#campos-do-usuário) do [usuário](#usuário)
-**/{USER_ID}/cart/{ITEM_ID}/{QUANTITY}** | _PUT_ |  *USER_ID* - Identificador do [usuário](#usuário) <BR> [*ITEM_ID*](#item) à ser alteado no [carrinho](#campos-do-usuário) <BR> *QUANTITY* - Quantidade a ser acrescida/decrescida | Informações do [carrinho](#campos-do-usuário) do [usuário](#usuário)
+**/** | _POST_ | Informações do novo [usuário](#campos-do-usuário) | Informações do novo [usuário](#usuário)criado. Esse serviço tem por utilidade a criação por iniciativa própria do usuário.
+
+##Exemplos de chamadas##
+
+### Criar um novo Usuário
+> **HOST**: _host:port/sales/api/users/_
+<BR>**METHOD**: _POST_
+<BR>**BODY**: ``` {"name":"novo nome", email: "mail@mail.com", password:"password", confirmPassword: "password"}```
+
+Código | Status | Exemplo de resposta 
+------ | ------ | --------------------
+_200_ | OK | ``` [{"id":12,"name":"calculadora","image":"","price":100.0},{"id":13,"name":"pneu","image":"","price":100.0},{"id":14,"name":"teclado","image":"","price":102.0},{"id":15,"name":"celular","image":"","price":0.01}]```|
+_422_ | UNPROCESSABLE_ENTITY | ``` {"email":"Você deve informar seu email!","name":"Você deve informar seu nome!","password":"Informe uma senha"}```|
+
+### Errors existentes para o código 422
+
+> Campo NOME vazio -> name: "Você deve informar seu nome!"; 
+> Campo NOME extrapolado -> name: "Seu nome deve conter no máximo 80 caracteres!"; 
+
+> Campo EMAIL vazio -> email: "Você deve informar seu email!"; 
+> Campo EMAIL extrapolado -> email: "Seu e-mail deve contern o máximo 100 caracteres!"; 
+> Campo EMAIL inválido -> email: "Você deve informar um e-mail válido!"; 
+> Campo EMAIL duplicado -> email: "O e-mail escolhido já está registrado!"; 
+
+> Campo SENHA vazio -> password: "Informe uma senha";
+> Campo SENHA e CONFIRMAÇÃO dispares -> password: "As senhas não conferem";
+> Erro desconhecido ao criptografar a senha -> password: "Não foi possível criptografar sua senha!";
+
 
 #Item#
 
@@ -105,6 +148,7 @@ O preço do item não pode ser menor que R$ 0,00.
 ###image###
 A única restrição do campo imagem é não ter mais de 512 caracteres.
 
+## Gerenciamento via serviços ##
 
 > Escopo: _**/items**_
 
@@ -146,6 +190,16 @@ Código | Status | Exemplo de resposta
 ------ | ------ | --------------------
 _201_ | CREATED | ``` {"id":16,"name":"Cabo de rede","image":"URL_TO_IMG","price":10.0}```|
 _422_ | UNPROCESSABLE_ENTITY | ``` {"price":"O preço deve ser maior que R$ 0,00!","name":"Você deve informar o nome do produto!"}```|
+
+### Errors existentes para o código 422
+
+> Campo NOME vazio -> name: "Você deve informar o nome do produto!"; 
+> Campo NOME extrapolado -> name: "O nome do produto deve conter no máximo 80 caracteres!"; 
+
+> Campo LINK extrapolado -> image: "O link informado é muito grande!"
+
+> Campo PREÇO inválido ou menor que 0 -> price: "O preço deve ser maior que R$ 0,00!";
+
 
 ### Alterar um item existente
 > **HOST**: _host:port/sales/api/items/16_
