@@ -43,10 +43,10 @@ public class ItemDAO extends GenericDAO<Item> {
     public Item getEntityFromResultSet(ResultSet resultSet) throws SQLException {
         Item item = new Item();
 
-        item.setId(resultSet.getInt("id"));
-        item.setName(resultSet.getString("name"));
-        item.setPrice(resultSet.getDouble("price"));
-        item.setImage(resultSet.getString("image"));
+        item.setId(resultSet.getInt("items.id"));
+        item.setName(resultSet.getString("items.name"));
+        item.setPrice(resultSet.getDouble("items.price"));
+        item.setImage(resultSet.getString("items.image"));
 
         return item;
     }

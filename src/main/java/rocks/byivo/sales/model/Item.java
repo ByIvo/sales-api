@@ -120,4 +120,11 @@ public class Item extends Entity {
     public void setPrice(Double price) {
         this.price = price;
     }
+
+    @Override
+    public String toString() {
+        return "Item{" + "id=" + id + ", name=" + name + '}';
+    }
+    
+    
 }
