@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.omg.PortableInterceptor.ORBInitInfoPackage.DuplicateName;
 import rocks.byivo.sales.model.Entity;
 
 /**
@@ -63,10 +62,24 @@ public abstract class GenericDAO<T extends Entity> {
     }
 
     public List<T> list() {
+        try {
+            return listUnsafe();
+        } catch (SQLException ex) {
+            Logger.getLogger(GenericDAO.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(GenericDAO.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return new ArrayList();
+    }
+
+    public List<T> listUnsafe() throws SQLException {
         final List<T> results = new ArrayList<>();
 
         String queryStatemente = String.format(LIST_ALL_STATEMENT, tableName);
-        this.executeQuery(queryStatemente, new QueryAdapter() {
+        this.executeQueryUnsafe(queryStatemente, new QueryAdapter() {
 
             @Override
             public void setupStatement(PreparedStatement statement) throws SQLException {
@@ -150,7 +163,7 @@ public abstract class GenericDAO<T extends Entity> {
         });
     }
 
-    public T insert(T value){
+    public T insert(T value) {
         try {
             value = insertUnsafe(value);
         } catch (SQLException ex) {
