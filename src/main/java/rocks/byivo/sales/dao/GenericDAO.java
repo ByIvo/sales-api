@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.omg.PortableInterceptor.ORBInitInfoPackage.DuplicateName;
 import rocks.byivo.sales.model.Entity;
 
 /**
@@ -31,183 +32,153 @@ public abstract class GenericDAO<T extends Entity> {
     private static final String UPDATE_STATEMENT = "UPDATE %1$s SET %2$s WHERE id = %3$s";
     private static final String LIST_ALL_STATEMENT = "SELECT * FROM %1$s %1$s";
     private static final String FIND_BY_ID_STATEMENT = "SELECT * FROM %1$s %1$s WHERE %1$s.id = ?";
+    private static final String DELETE_STATEMENT = "DELETE FROM %1$s WHERE id = ?";
 
     public GenericDAO(String tableName) {
         this.tableName = tableName;
     }
 
-    public T findById(Integer id) {
-        Connection connection = null;
-        ResultSet resultSet = null;
-        PreparedStatement statement = null;
-        T entity = null;
+    protected T container;
 
-        try {
-            connection = this.getConnectionManager().getConnection();
+    public synchronized T findById(final Integer id) {
+        container = null;
 
-            String queryStatemente = String.format(FIND_BY_ID_STATEMENT, tableName);
+        String queryStatemente = String.format(FIND_BY_ID_STATEMENT, tableName);
+        this.executeQuery(queryStatemente, new QueryAdapter() {
 
-            statement = connection.prepareStatement(queryStatemente);
-            statement.setInt(1, id);
-
-            resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                entity = this.getEntityFromResultSet(resultSet);
+            @Override
+            public void setupStatement(PreparedStatement statement) throws SQLException {
+                statement.setInt(1, id);
             }
 
-        } catch (SQLException ex) {
-            Logger.getLogger(GenericDAO.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(GenericDAO.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException ex) {
+            @Override
+            public void retrieveResults(ResultSet resultSet) throws SQLException {
+                if (resultSet.next()) {
+                    container = GenericDAO.this.getEntityFromResultSet(resultSet);
                 }
             }
+        });
 
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException ex) {
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                }
-            }
-        }
-
-        return entity;
+        return container;
     }
 
     public List<T> list() {
-        Connection connection = null;
-        ResultSet resultSet = null;
-        Statement statement = null;
-        List<T> results = new ArrayList<>();
+        final List<T> results = new ArrayList<>();
 
-        try {
-            connection = this.getConnectionManager().getConnection();
+        String queryStatemente = String.format(LIST_ALL_STATEMENT, tableName);
+        this.executeQuery(queryStatemente, new QueryAdapter() {
 
-            String queryStatemente = String.format(LIST_ALL_STATEMENT, tableName);
+            @Override
+            public void setupStatement(PreparedStatement statement) throws SQLException {
 
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(queryStatemente);
-
-            while (resultSet.next()) {
-                T newObject = this.getEntityFromResultSet(resultSet);
-                results.add(newObject);
             }
 
-        } catch (SQLException ex) {
-            Logger.getLogger(GenericDAO.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(GenericDAO.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException ex) {
+            @Override
+            public void retrieveResults(ResultSet resultSet) throws SQLException {
+                while (resultSet.next()) {
+                    T newObject = GenericDAO.this.getEntityFromResultSet(resultSet);
+                    results.add(newObject);
                 }
             }
-
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException ex) {
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                }
-            }
-        }
+        });
 
         return results;
     }
 
-    public T update(T value) {
-        Map<String, Object> columns = new HashMap<>();
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-
+    public T delete(T value) {
         try {
-            this.getColumnValues(value, columns);
-            connection = this.getConnectionManager().getConnection();
-
-            preparedStatement = this.prepareUpdateStatement(value, connection, columns);
-            this.setStatementValues(columns, preparedStatement);
-            preparedStatement.execute();
-
+            this.deleteUnsafe(value);
         } catch (SQLException ex) {
             Logger.getLogger(GenericDAO.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(GenericDAO.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
+        }
+        return value;
+    }
 
-            if (preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                } catch (SQLException ex) {
-                }
+    public T deleteUnsafe(final T value) throws SQLException, Exception {
+
+        return this.executeUpdateUnsafe(value, new UpdateAdapter<T>() {
+
+            @Override
+            public PreparedStatement prepareStatement(T value, Connection connection, Map<String, Object> columns) throws SQLException {
+                String deleteStatement = String.format(DELETE_STATEMENT, GenericDAO.this.getTableName());
+
+                return GenericDAO.this.prepareStatement(deleteStatement, connection);
             }
 
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                }
+            @Override
+            public void setupStatement(PreparedStatement statement) throws SQLException {
+                statement.setInt(1, value.getId());
             }
+
+            @Override
+            public void handleGeneratedKey(T insertedValue, int key) throws SQLException {
+
+            }
+        });
+    }
+
+    public T update(T value) {
+        try {
+            value = this.updateUnsafe(value);
+        } catch (SQLException ex) {
+            Logger.getLogger(GenericDAO.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(GenericDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return value;
+    }
+
+    public T updateUnsafe(T value) throws SQLException, Exception {
+
+        return this.executeUpdateUnsafe(value, new UpdateAdapter<T>() {
+
+            @Override
+            public PreparedStatement prepareStatement(T value, Connection connection, Map<String, Object> columns) throws SQLException, Exception {
+                return GenericDAO.this.prepareUpdateStatement(value, connection, columns);
+            }
+
+            @Override
+            public void setupStatement(PreparedStatement statement) throws SQLException {
+            }
+
+            @Override
+            public void handleGeneratedKey(T insertedValue, int key) throws SQLException {
+
+            }
+        });
+    }
+
+    public T insert(T value){
+        try {
+            value = insertUnsafe(value);
+        } catch (SQLException ex) {
+            Logger.getLogger(GenericDAO.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(GenericDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return value;
     }
 
-    public T insert(T value) {
-        Map<String, Object> columns = new HashMap<>();
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        try {
-            this.getColumnValues(value, columns);
-            connection = this.getConnectionManager().getConnection();
+    public T insertUnsafe(final T value) throws SQLException, Exception {
+        return this.executeUpdateUnsafe(value, new UpdateAdapter<T>() {
 
-            preparedStatement = this.prepareInsertStatement(value, connection, columns);
-            this.setStatementValues(columns, preparedStatement);
-            boolean isObj = preparedStatement.execute();
-
-            if (!isObj) {
-                int newId = this.getGeneratedKey(preparedStatement);
-                value.setId(newId);
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(GenericDAO.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(GenericDAO.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-
-            if (preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                } catch (SQLException ex) {
-                }
+            @Override
+            public PreparedStatement prepareStatement(T value, Connection connection, Map<String, Object> columns) throws SQLException, Exception {
+                return GenericDAO.this.prepareInsertStatement(value, connection, columns);
             }
 
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                }
+            @Override
+            public void setupStatement(PreparedStatement statement) throws SQLException {
             }
-        }
 
-        return value;
+            @Override
+            public void handleGeneratedKey(T insertedValue, int key) throws SQLException {
+                insertedValue.setId(key);
+            }
+        });
     }
 
     private int getGeneratedKey(PreparedStatement preparedStatement) throws Exception {
@@ -219,24 +190,44 @@ public abstract class GenericDAO<T extends Entity> {
         return -1;
     }
 
-    private PreparedStatement prepareInsertStatement(T value, Connection connection, Map<String, Object> columns) throws SQLException {
+    private PreparedStatement prepareInsertStatement(T value, Connection connection, Map<String, Object> columns) throws SQLException, Exception {
         String columnNames = this.parseColumnNames(columns);
         String valueNames = this.createValueContainer(columns.size());
 
         String insertStatement = String.format(INSERT_STATEMENT, tableName, columnNames, valueNames);
 
-        return prepareStatement(insertStatement, connection);
+        PreparedStatement preparedStatement = prepareStatement(insertStatement, connection);
+
+        this.setStatementValues(columns, preparedStatement);
+
+        return preparedStatement;
     }
 
-    private PreparedStatement prepareUpdateStatement(T value, Connection connection, Map<String, Object> columns) throws SQLException {
+    private PreparedStatement prepareUpdateStatement(T value, Connection connection, Map<String, Object> columns) throws SQLException, Exception {
         String columnNames = this.parseUpdateColumnNames(columns);
 
         String updateStatement = String.format(UPDATE_STATEMENT, tableName, columnNames, value.getId());
 
-        return prepareStatement(updateStatement, connection);
+        PreparedStatement preparedStatement = prepareStatement(updateStatement, connection);
+
+        this.setStatementValues(columns, preparedStatement);
+
+        return preparedStatement;
     }
 
-    private PreparedStatement prepareStatement(String statement, Connection connection) throws SQLException {
+    public PreparedStatement prepareUpdateStatement(T value, String statement, Connection connection, Map<String, Object> columns) throws SQLException, Exception {
+        String columnNames = this.parseUpdateColumnNames(columns);
+
+        String updateStatement = String.format(statement, tableName, columnNames);
+
+        PreparedStatement preparedStatement = prepareStatement(updateStatement, connection);
+
+        this.setStatementValues(columns, preparedStatement);
+
+        return preparedStatement;
+    }
+
+    public PreparedStatement prepareStatement(String statement, Connection connection) throws SQLException {
         return connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
     }
 
@@ -305,10 +296,130 @@ public abstract class GenericDAO<T extends Entity> {
         return stbReturn.toString();
     }
 
+    public T executeUpdate(T value, UpdateAdapter<T> updateAdapter) {
+
+        try {
+            value = this.executeUpdateUnsafe(value, updateAdapter);
+        } catch (SQLException ex) {
+            Logger.getLogger(GenericDAO.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(GenericDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return value;
+    }
+
+    public T executeUpdateUnsafe(T value, UpdateAdapter<T> updateAdapter) throws SQLException, Exception {
+        Map<String, Object> columns = new HashMap<>();
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            this.getColumnValues(value, columns);
+            connection = this.getConnectionManager().getConnection();
+
+            preparedStatement = updateAdapter.prepareStatement(value, connection, columns);
+            updateAdapter.setupStatement(preparedStatement);
+
+            boolean isObj = preparedStatement.execute();
+
+            if (!isObj) {
+                int newId = this.getGeneratedKey(preparedStatement);
+                updateAdapter.handleGeneratedKey(value, newId);
+            }
+        } finally {
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException ex) {
+                }
+            }
+
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                }
+            }
+        }
+
+        return value;
+    }
+
+    public void executeQuery(String queryStatemente, QueryAdapter queryAdapter) {
+        try {
+            this.executeQueryUnsafe(queryStatemente, queryAdapter);
+
+        } catch (SQLException ex) {
+            Logger.getLogger(GenericDAO.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(GenericDAO.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void executeQueryUnsafe(String queryStatemente, QueryAdapter queryAdapter) throws SQLException {
+        Connection connection = null;
+        ResultSet resultSet = null;
+        PreparedStatement statement = null;
+
+        try {
+            connection = this.getConnectionManager().getConnection();
+
+            statement = connection.prepareStatement(queryStatemente);
+            queryAdapter.setupStatement(statement);
+
+            resultSet = statement.executeQuery();
+            queryAdapter.retrieveResults(resultSet);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException ex) {
+                }
+            }
+
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException ex) {
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                }
+            }
+        }
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
     public abstract void getColumnValues(T values, Map<String, Object> map);
 
     public abstract T getEntityFromResultSet(ResultSet resultSet) throws SQLException;
 
-    protected abstract ConnectionManager getConnectionManager();
+    protected abstract ConnectionManager
+            getConnectionManager();
+
+    protected interface QueryAdapter {
+
+        void setupStatement(PreparedStatement statement) throws SQLException;
+
+        void retrieveResults(ResultSet resultSet) throws SQLException;
+    }
+
+    protected interface UpdateAdapter<T> {
+
+        PreparedStatement prepareStatement(T value, Connection connection, Map<String, Object> columns) throws SQLException, Exception;
+
+        void setupStatement(PreparedStatement statement) throws SQLException;
+
+        void handleGeneratedKey(T insertedValue, int key) throws SQLException;
+    }
 
 }
