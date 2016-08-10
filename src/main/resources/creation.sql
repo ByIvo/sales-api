@@ -67,7 +67,6 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `sales_api`.`sells` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `payment` VARCHAR(50) NOT NULL,
   `date` DATETIME NOT NULL,
   `user_id` INT NOT NULL,
   PRIMARY KEY (`id`),
