@@ -7,6 +7,7 @@ package model;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Test;
 import rocks.byivo.sales.model.User;
 import static org.junit.Assert.*;
@@ -257,20 +258,20 @@ public class UserTest {
 
         assertTrue(user.validContent());
     }
-    
+
     @Test
     public void updateUserSuccessfull() {
-        
+
         String name = "Ivo";
-        String email= "irb@asdasd.com";
+        String email = "irb@asdasd.com";
         String password = "asd";
-        
+
         User user = new User();
         user.setName("nome");
         user.setEmail("mail@mail.com");
         user.setPassword(password);
         user.setConfirmPassword(password);
-        
+
         User changes = new User();
         changes.setName(name);
         changes.setEmail(email);
@@ -280,25 +281,25 @@ public class UserTest {
         assertTrue(user.validContent());
         assertTrue(changes.validContent());
         assertTrue(user.update(changes).isEmpty());
-        
+
         assertEquals(name, user.getName());
         assertEquals(email, user.getEmail());
         assertEquals(password, user.getSecuredPassword());
     }
-    
-     @Test
+
+    @Test
     public void updateUserUnsuccessfull() {
-        
+
         String name = "Ivo";
-        String email= "irbsdasd.com";
+        String email = "irbsdasd.com";
         String password = "asd";
-        
+
         User user = new User();
         user.setName("nome");
         user.setEmail("mail@mail.com");
         user.setPassword(password);
         user.setConfirmPassword(password);
-        
+
         User changes = new User();
         changes.setName(name);
         changes.setEmail(email);
@@ -308,42 +309,86 @@ public class UserTest {
         assertTrue(user.validContent());
         assertFalse(changes.validContent());
         assertFalse(user.update(changes).isEmpty());
-        
+
         assertEquals("nome", user.getName());
         assertEquals("mail@mail.com", user.getEmail());
         assertEquals(password, user.getSecuredPassword());
     }
 
-        @Test
+    @Test
     public void updateUserSuccessfullTest() {
-        
+
         String name = "Ivo";
-        String email= "irb@asdasd.com";
+        String email = "irb@asdasd.com";
         String password = "asd";
-        
+
         User user = new User();
         user.setName("nome");
         user.setEmail("mail@mail.com");
         user.setPassword(password);
         user.setConfirmPassword(password);
-        
+
         User changes = new User();
         changes.setName(name);
         changes.setEmail(email);
 
         assertTrue(user.validContent());
         assertTrue(user.update(changes).isEmpty());
-        
+
         assertEquals(name, user.getName());
         assertEquals(email, user.getEmail());
         assertEquals(password, user.getSecuredPassword());
     }
-    
+
     @Test
     public void emptyCar() {
         User user = new User();
 
         assertTrue(user.getCart().isEmpty());
+    }
+
+    @Test
+    public void assertPasswordIsEncrypted() {
+        User user = new User();
+        user.setPassword("password");
+        user.setConfirmPassword("password");
+
+        String hash = DigestUtils.sha1Hex("password");
+
+        boolean encrypted = user.encryptPassword();
+        Map<String, String> errors = user.getInvalidMessages(true);
+
+        assertFalse(errors.containsKey("password"));
+        assertTrue(encrypted);
+        assertEquals(hash, user.getSecuredPassword());
+    }
+
+    @Test
+    public void assertPasswordIsNotEncrypted() {
+        User user = new User();
+        user.setPassword("password");
+        user.setConfirmPassword("password1");
+
+        boolean encrypted = user.encryptPassword();
+        Map<String, String> errors = user.getInvalidMessages(true);
+
+        assertFalse(encrypted);
+        assertTrue(errors.containsKey("password"));
+        assertEquals("password", user.getSecuredPassword());
+    }
+
+    @Test
+    public void assertPasswordIsNull() {
+        User user = new User();
+        user.setPassword(null);
+        user.setConfirmPassword(null);
+
+        boolean encrypted = user.encryptPassword();
+        Map<String, String> errors = user.getInvalidMessages(true);
+
+        assertFalse(encrypted);
+        assertTrue(errors.containsKey("password"));
+        assertNull(user.getPassword());
     }
 
 }

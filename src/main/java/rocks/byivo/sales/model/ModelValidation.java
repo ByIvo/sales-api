@@ -22,6 +22,7 @@ public class ModelValidation {
         
         public static final String EMPTY_PASSWORD = "Informe uma senha";
         public static final String UNMATCH_PASSWORD = "As senhas não conferem";
+        public static final String PASSWORD_CANT_BE_SECURE = "Não foi possível criptografar sua senha!";
     }
     
     public static class Item {

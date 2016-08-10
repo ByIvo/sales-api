@@ -5,7 +5,7 @@
  */
 package rocks.byivo.sales.model;
 
-import com.sun.org.apache.bcel.internal.generic.AALOAD;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

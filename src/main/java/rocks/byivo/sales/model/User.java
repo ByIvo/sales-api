@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  *
@@ -57,7 +58,7 @@ public class User extends Entity {
         return mockValues;
     }
 
-    public Map<String,String> update(User newValues) {
+    public Map<String, String> update(User newValues) {
         User mockValues = createMock(newValues);
 
         boolean valid = mockValues.validContent();
@@ -120,6 +121,19 @@ public class User extends Entity {
         return matcher.matches();
     }
 
+    public boolean encryptPassword() {
+        if (this.password != null) {
+            if (this.passwordMatches()) {
+                this.password = DigestUtils.sha1Hex(password);
+                this.confirmPassword = null;
+                return true;
+            }
+        }
+
+        this.putInvalidMessage("password", ModelValidation.User.PASSWORD_CANT_BE_SECURE);
+        return false;
+    }
+
     @Override
     public Integer getId() {
         return id;
@@ -161,7 +175,7 @@ public class User extends Entity {
     public void setConfirmPassword(String confirmPassword) {
         this.confirmPassword = confirmPassword;
     }
-    
+
     @JsonIgnore
     public String getSecuredPassword() {
         return this.password;
