@@ -16,6 +16,20 @@
 
 > Substitua os parâmetros iniciados por **'DB_'** de acordo com o sugerido.
 
+# Criando a base de dados
+
+> Acesse o mysql
+```bash
+ mysql -u USER -p
+ ****
+```
+
+> execute o comando passando o caminho para o [ARQUIVO DE CRIAÇÃO](https://github.com/ByIvo/sales-api/blob/master/src/main/resources/creation.sql) do banco de dados.
+
+```bash
+ source PATH/TO/CREATION.SQL
+```
+
 # Sales API
 
 1. [Usuario] (#usuário)
