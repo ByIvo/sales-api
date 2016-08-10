@@ -26,7 +26,7 @@ public class SellItem extends Entity {
         price = 0d;
     }
 
-    public double getTotalPrice() {
+    public Double getTotalPrice() {
         return this.quantity * this.price;
     }
 
@@ -52,7 +52,11 @@ public class SellItem extends Entity {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(double price) {
+        if(price < 0) {
+            price = 0d;
+        }
+        
         this.price = price;
     }
 
@@ -60,7 +64,11 @@ public class SellItem extends Entity {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(int quantity) {
+        if(quantity < 0) {
+            quantity = 1;
+        }
+        
         this.quantity = quantity;
     }
 

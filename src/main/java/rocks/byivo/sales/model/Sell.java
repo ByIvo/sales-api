@@ -29,7 +29,7 @@ public class Sell extends Entity{
         sellItems = new ArrayList<>();
     }
     
-    public double getTotal() {
+    public Double getTotal() {
         double total = 0d;
         
         for(SellItem itemSell : sellItems) {
@@ -70,6 +70,11 @@ public class Sell extends Entity{
 
     public void setDate(Date date) {
         this.date = date;
+    }
+    
+    public void addItem(SellItem sellItem) {
+        this.getSellItems().add(sellItem);
+        sellItem.setSell(this);
     }
 
     public List<SellItem> getSellItems() {
