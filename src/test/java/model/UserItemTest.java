@@ -26,64 +26,20 @@ public class UserItemTest {
 
         assertTrue(user.getCart().isEmpty());
     }
-
-    @Test
-    public void fullCart() {
+    
+     @Test
+    public void negativeValue() {
         User user = new User();
-
-        Item item1 = new Item();
-        item1.setId(1);
-
-        Item item2 = new Item();
-        item2.setId(2);
-
-        user.addToCart(item1, 1);
-        user.addToCart(item2, 1);
-
-        assertEquals(2, user.getCart().size());
+        Item item = new Item();
+        
+        UserItem userItem = new UserItem();
+        userItem.setUser(user);
+        userItem.setItem(item);
+        userItem.sumQuantity(-5);
+        
+        assertTrue(userItem.getQuantity() > 0);
     }
-
-    @Test
-    public void fullCartDoubleAdding() {
-        User user = new User();
-
-        Item item1 = new Item();
-        item1.setId(1);
-
-        Item item2 = new Item();
-        item2.setId(2);
-
-        user.addToCart(item1, 1);
-        user.addToCart(item2, 1);
-        user.addToCart(item2, 1);
-
-        assertEquals(2, user.getCart().size());
-    }
-
-    @Test
-    public void addingItem() {
-        User user = new User();
-
-        Item item1 = new Item();
-        item1.setId(1);
-
-        user.addToCart(item1, 5);
-        user.addToCart(item1, 5);
-
-        assertEquals((Integer) 10, user.getCart().get(0).getQuantity());
-    }
-
-    @Test
-    public void worngQuantity() {
-        User user = new User();
-
-        Item item1 = new Item();
-        item1.setId(1);
-
-        user.addToCart(item1, 0);
-
-        assertEquals((Integer) 1, user.getCart().get(0).getQuantity());
-    }
+    
 
     @Test
     public void sumItem() {
