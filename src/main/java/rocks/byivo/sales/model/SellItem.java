@@ -5,6 +5,8 @@
  */
 package rocks.byivo.sales.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  *
  * @author byivo
@@ -19,6 +21,7 @@ public class SellItem extends Entity {
 
     private Integer quantity;
 
+    @JsonIgnore
     private Sell sell;
 
     public SellItem() {

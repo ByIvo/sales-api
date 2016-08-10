@@ -19,8 +19,6 @@ public class Sell extends Entity{
     
     private User user;
     
-    private String payment;
-    
     private Date date;
     
     private List<SellItem> sellItems;
@@ -54,14 +52,6 @@ public class Sell extends Entity{
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public String getPayment() {
-        return payment;
-    }
-
-    public void setPayment(String payment) {
-        this.payment = payment;
     }
 
     public Date getDate() {
