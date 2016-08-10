@@ -34,9 +34,7 @@ public class ModelValidation {
         public static final String WRONG_PRICE = "O preço deve ser maior que R$ 0,00!";
     }
     
-    public static class Sell {
-        public static final String EMPTY_PAYMENT = "Informe um meio de pagamento!";
-        
+    public static class Sell {      
         public static final String EMPTY_CART = "Você deve comprar ao menos um item!";
         
         public static final String NULL_USER = "Você deve indentificar-se para realizar a compra!";
