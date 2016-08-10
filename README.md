@@ -113,15 +113,23 @@ _422_ | UNPROCESSABLE_ENTITY | ``` {"email":"Você deve informar seu email!","na
 ### Errors existentes para o código 422
 
 > Campo NOME vazio -> name: "Você deve informar seu nome!"; 
+
 > Campo NOME extrapolado -> name: "Seu nome deve conter no máximo 80 caracteres!"; 
 
+
 > Campo EMAIL vazio -> email: "Você deve informar seu email!"; 
-> Campo EMAIL extrapolado -> email: "Seu e-mail deve contern o máximo 100 caracteres!"; 
+
+> Campo EMAIL extrapolado -> email: "Seu e-mail deve contern o máximo 100 caracteres!";
+
 > Campo EMAIL inválido -> email: "Você deve informar um e-mail válido!"; 
+
 > Campo EMAIL duplicado -> email: "O e-mail escolhido já está registrado!"; 
 
+
 > Campo SENHA vazio -> password: "Informe uma senha";
+
 > Campo SENHA e CONFIRMAÇÃO dispares -> password: "As senhas não conferem";
+
 > Erro desconhecido ao criptografar a senha -> password: "Não foi possível criptografar sua senha!";
 
 
@@ -194,9 +202,12 @@ _422_ | UNPROCESSABLE_ENTITY | ``` {"price":"O preço deve ser maior que R$ 0,00
 ### Errors existentes para o código 422
 
 > Campo NOME vazio -> name: "Você deve informar o nome do produto!"; 
+
 > Campo NOME extrapolado -> name: "O nome do produto deve conter no máximo 80 caracteres!"; 
 
+
 > Campo LINK extrapolado -> image: "O link informado é muito grande!"
+
 
 > Campo PREÇO inválido ou menor que 0 -> price: "O preço deve ser maior que R$ 0,00!";
 
