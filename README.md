@@ -107,7 +107,7 @@ Caminho | Método | Parametros | Retorno
 
 Código | Status | Exemplo de resposta 
 ------ | ------ | --------------------
-_200_ | OK | ``` [{"id":12,"name":"calculadora","image":"","price":100.0},{"id":13,"name":"pneu","image":"","price":100.0},{"id":14,"name":"teclado","image":"","price":102.0},{"id":15,"name":"celular","image":"","price":0.01}]```|
+_200_ | OK | ``` {"id":7,"name":"novo nome","email":"mail@mail.test","password":null,"confirmPassword":null,"cart":[]}```|
 _422_ | UNPROCESSABLE_ENTITY | ``` {"email":"Você deve informar seu email!","name":"Você deve informar seu nome!","password":"Informe uma senha"}```|
 
 ### Errors existentes para o código 422
